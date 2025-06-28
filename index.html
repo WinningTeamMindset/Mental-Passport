@@ -397,7 +397,8 @@
             const margin = 15;
             const pageWidth = doc.internal.pageSize.getWidth();
             const contentWidth = pageWidth - margin * 2;
-            const canvasOptions = { scale: quality, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' };
+            // Simplified canvas options for better compatibility
+            const canvasOptions = { scale: quality, backgroundColor: '#ffffff' };
 
             // Page 1: Player Info + Consolidated Chart
             const playerInfoEl = document.getElementById('playerInfoCard');
@@ -431,7 +432,7 @@
             doc.save(`${getFilename()}.pdf`);
         } catch (error) {
             console.error("Failed to create PDF:", error);
-            alert("An error occurred while creating the PDF. Please check the console for details. A common cause is the player image; try removing and re-adding it.");
+            alert("An error occurred while creating the PDF. Please check the console for details.");
         } finally {
             pdfButton.disabled = false;
             pdfButton.innerHTML = 'Create PDF';
@@ -439,6 +440,7 @@
     }
 
     function resetData() {
+        // Clear all player input fields
         document.getElementById('firstName').value = '';
         document.getElementById('lastName').value = '';
         document.getElementById('dob').value = '';
@@ -448,19 +450,11 @@
         document.getElementById('marketValue').value = '';
         document.getElementById('playerImage').src = SVG_PLACEHOLDER;
         
-        psychologyData.pillars = JSON.parse(JSON.stringify(defaultPsychologyData.pillars));
-
-        psychologyData.pillars.forEach((pillar, pillarIndex) => {
-            pillar.parameters.forEach((param, paramIndex) => {
-                const slider = document.querySelector(`input[data-pillar-index='${pillarIndex}'][data-param-index='${paramIndex}']`);
-                if (slider) {
-                    slider.value = param.score;
-                    slider.nextElementSibling.textContent = param.score;
-                }
-            });
-        });
-
-        updateAllCharts();
+        // Restore data model to its default state
+        psychologyData = JSON.parse(JSON.stringify(defaultPsychologyData));
+        
+        // Completely redraw the page with the fresh default data
+        initializePage();
     }
     
     // --- EVENT LISTENERS ---
