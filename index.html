@@ -141,7 +141,7 @@
                 <!-- Player Picture & Market Value Column -->
                 <div class="flex-shrink-0 flex flex-col items-center gap-4 w-40 mx-auto sm:mx-0">
                     <label for="playerImageInput" class="cursor-pointer">
-                        <img id="playerImage" src="https://placehold.co/150x150/E2E8F0/4A5568?text=Add+Photo" alt="Player" class="w-36 h-36 rounded-full object-cover border-4 border-gray-200">
+                        <img id="playerImage" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iNzUiIGN5PSI3NSIgcj0iNzUiIGZpbGw9IiNFMkU4RjAiLz48bGluZSB4MT0iNzUiIHkxPSI1MCIgeDI9Ijc1IiB5Mj0iMTAwIiBzdHJva2U9IiM0QTU1NjgiIHN0cm9rZS13aWR0aD0iNCIvPjxsaW5lIHgxPSI1MCIgeTE9Ijc1IiB4Mj0iMTAwIiB5Mj0iNzUiIHN0cm9rZT0iIzRBNTU2OCIgc3Ryb2tlLXdpZHRoPSI0Ii8+PC9zdmc+" alt="Player" class="w-36 h-36 rounded-full object-cover border-4 border-gray-200">
                     </label>
                     <input type="file" id="playerImageInput" class="hidden" accept="image/*">
                     <!-- New Market Value Field -->
@@ -196,7 +196,8 @@
 <script>
     // --- SETUP AND DATA ---
     window.jspdf = window.jspdf.jsPDF; // aliasing for jsPDF v2+
-    
+    const SVG_PLACEHOLDER = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iNzUiIGN5PSI3NSIgcj0iNzUiIGZpbGw9IiNFMkU4RjAiLz48bGluZSB4MT0iNzUiIHkxPSI1MCIgeDI9Ijc1IiB5Mj0iMTAwIiBzdHJva2U9IiM0QTU1NjgiIHN0cm9rZS13aWR0aD0iNCIvPjxsaW5lIHgxPSI1MCIgeTE9Ijc1IiB4Mj0iMTAwIiB5Mj0iNzUiIHN0cm9rZT0iIzRBNTU2OCIgc3Ryb2tlLXdpZHRoPSI0Ii8+PC9zdmc+";
+
     // Default state for resetting
     const defaultPsychologyData = {
         pillars: [
@@ -345,7 +346,7 @@
         document.getElementById('position').value = data.position || '';
         document.getElementById('shirtNr').value = data.shirtNr || '';
         document.getElementById('marketValue').value = data.marketValue || '';
-        document.getElementById('playerImage').src = data.imageData || 'https://placehold.co/150x150/E2E8F0/4A5568?text=Add+Photo';
+        document.getElementById('playerImage').src = data.imageData || SVG_PLACEHOLDER;
         psychologyData.pillars = data.scores || JSON.parse(JSON.stringify(defaultPsychologyData.pillars));
         initializePage();
     }
@@ -430,7 +431,7 @@
             doc.save(`${getFilename()}.pdf`);
         } catch (error) {
             console.error("Failed to create PDF:", error);
-            alert("An error occurred while creating the PDF. Please check the console for details.");
+            alert("An error occurred while creating the PDF. Please check the console for details. A common cause is the player image; try removing and re-adding it.");
         } finally {
             pdfButton.disabled = false;
             pdfButton.innerHTML = 'Create PDF';
@@ -445,7 +446,7 @@
         document.getElementById('position').value = '';
         document.getElementById('shirtNr').value = '';
         document.getElementById('marketValue').value = '';
-        document.getElementById('playerImage').src = 'https://placehold.co/150x150/E2E8F0/4A5568?text=Add+Photo';
+        document.getElementById('playerImage').src = SVG_PLACEHOLDER;
         
         psychologyData.pillars = JSON.parse(JSON.stringify(defaultPsychologyData.pillars));
 
