@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -109,6 +109,10 @@
             align-items: center;
             gap: 8px;
         }
+        .control-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
@@ -133,16 +137,21 @@
 
         <!-- Player Information Card -->
         <div id="playerInfoCard" class="card mb-8">
-            <div class="flex flex-col sm:flex-row items-center gap-8">
-                <!-- Player Picture -->
-                <div class="flex-shrink-0">
+            <div class="flex flex-col sm:flex-row items-start gap-8">
+                <!-- Player Picture & Market Value Column -->
+                <div class="flex-shrink-0 flex flex-col items-center gap-4 w-40 mx-auto sm:mx-0">
                     <label for="playerImageInput" class="cursor-pointer">
                         <img id="playerImage" src="https://placehold.co/150x150/E2E8F0/4A5568?text=Add+Photo" alt="Player" class="w-36 h-36 rounded-full object-cover border-4 border-gray-200">
                     </label>
                     <input type="file" id="playerImageInput" class="hidden" accept="image/*">
+                    <!-- New Market Value Field -->
+                    <div class="w-full">
+                        <label class="input-label text-center block mb-1" for="marketValue">Market Value EUR</label>
+                        <input id="marketValue" type="number" class="input-field text-center" placeholder="5,000,000">
+                    </div>
                 </div>
-                <!-- Player Details -->
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-4 w-full">
+                <!-- Player Details Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 w-full">
                     <div><label class="input-label" for="firstName">First Name</label><input id="firstName" type="text" class="input-field" placeholder="John"></div>
                     <div><label class="input-label" for="lastName">Last Name</label><input id="lastName" type="text" class="input-field" placeholder="Doe"></div>
                     <div><label class="input-label" for="dob">D.O.B.</label><input id="dob" type="date" class="input-field"></div>
@@ -209,7 +218,45 @@
         if (psychologyData.charts[canvasId]) {
             psychologyData.charts[canvasId].destroy();
         }
-        const chartConfig = { type: 'radar', data: { labels: labels, datasets: [{ label: 'Score', data: data, backgroundColor: backgroundColor, borderColor: borderColor, borderWidth: 2, pointBackgroundColor: borderColor, pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: borderColor, pointRadius: 4, pointHoverRadius: 6 }] }, options: { animation: false, responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: '#e2e8f0' }, grid: { color: '#e2e8f0', circular: true }, pointLabels: { font: { size: 11, weight: '500' }, color: '#4a5568' }, ticks: { color: '#718096', backdropColor: 'rgba(255, 255, 255, 0.75)', stepSize: 2, font: { size: 10 } }, suggestedMin: 0, suggestedMax: 10 } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw}` } } }, elements: { line: { tension: 0.2 } } } };
+        const chartConfig = {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Score',
+                    data: data,
+                    backgroundColor: backgroundColor,
+                    borderColor: borderColor,
+                    borderWidth: 3,
+                    pointBackgroundColor: borderColor,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: borderColor,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                }]
+            },
+            options: {
+                animation: false,
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: '#e2e8f0', lineWidth: 2 },
+                        grid: { color: '#e2e8f0', circular: true, lineWidth: 2 },
+                        pointLabels: { font: { size: 12, weight: '500' }, color: '#4a5568' },
+                        ticks: { color: '#718096', backdropColor: 'rgba(255, 255, 255, 0.75)', stepSize: 1, font: { size: 12 } },
+                        suggestedMin: 1,
+                        suggestedMax: 10,
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw}` } }
+                },
+                elements: { line: { tension: 0.2 } }
+            }
+        };
         if (canvasId === 'consolidatedChart') {
             chartConfig.options.scales.r.pointLabels.font.size = 14;
             chartConfig.options.scales.r.pointLabels.font.weight = '600';
@@ -257,22 +304,9 @@
             const card = document.createElement('div');
             card.className = 'card pillar-card';
             card.id = `pillarCard${pillarIndex}`;
-            const parameterSliders = pillar.parameters.map((param, paramIndex) => `<div class="flex items-center gap-4 py-2"><label class="flex-1 text-gray-700 text-sm">${param.name}</label><input type="range" min="0" max="10" value="${param.score}" step="0.5" class="w-full max-w-xs" data-pillar-index="${pillarIndex}" data-param-index="${paramIndex}"><span class="score-display text-right">${param.score.toFixed(1)}</span></div>`).join('');
+            const parameterSliders = pillar.parameters.map((param, paramIndex) => `<div class="flex items-center gap-4 py-2"><label class="flex-1 text-gray-700 text-sm">${param.name}</label><input type="range" min="1" max="10" value="${param.score}" step="1" class="w-full max-w-xs" data-pillar-index="${pillarIndex}" data-param-index="${paramIndex}"><span class="score-display text-right">${param.score}</span></div>`).join('');
             
-            // ** UPDATED LAYOUT: Chart on top, scores below **
-            card.innerHTML = `
-                <div class="flex flex-col gap-8 items-center">
-                    <div class="w-full h-80">
-                        <canvas id="pillarChart${pillarIndex}"></canvas>
-                    </div>
-                    <div class="w-full">
-                        <div class="pillar-header flex justify-between items-center">
-                            <h2 class="text-xl font-bold">${pillar.title}</h2>
-                        </div>
-                        <div class="space-y-1">${parameterSliders}</div>
-                    </div>
-                </div>
-            `;
+            card.innerHTML = `<div class="flex flex-col gap-8 items-center"><div class="w-full h-80"><canvas id="pillarChart${pillarIndex}"></canvas></div><div class="w-full"><div class="pillar-header flex justify-between items-center"><h2 class="text-xl font-bold">${pillar.title}</h2></div><div class="space-y-1">${parameterSliders}</div></div></div>`;
             pillarsContainer.appendChild(card);
             
             const labels = pillar.parameters.map(p => p.name.replace(/ /g, '\n'));
@@ -297,6 +331,7 @@
             nationality: document.getElementById('nationality').value,
             position: document.getElementById('position').value,
             shirtNr: document.getElementById('shirtNr').value,
+            marketValue: document.getElementById('marketValue').value,
             imageData: document.getElementById('playerImage').src,
             scores: psychologyData.pillars
         };
@@ -309,6 +344,7 @@
         document.getElementById('nationality').value = data.nationality || '';
         document.getElementById('position').value = data.position || '';
         document.getElementById('shirtNr').value = data.shirtNr || '';
+        document.getElementById('marketValue').value = data.marketValue || '';
         document.getElementById('playerImage').src = data.imageData || 'https://placehold.co/150x150/E2E8F0/4A5568?text=Add+Photo';
         psychologyData.pillars = data.scores || JSON.parse(JSON.stringify(defaultPsychologyData.pillars));
         initializePage();
@@ -349,47 +385,81 @@
     }
     
     async function createPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-        const quality = 2;
-        const margin = 15;
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const contentWidth = pageWidth - margin * 2;
-        
-        // Page 1: Player Info + Consolidated Chart
-        const playerInfoCanvas = await html2canvas(document.getElementById('playerInfoCard'), { scale: quality });
-        const consolidatedCanvas = await html2canvas(document.getElementById('consolidatedCard'), { scale: quality });
-        const pInfoHeight = (playerInfoCanvas.height * contentWidth) / playerInfoCanvas.width;
-        doc.addImage(playerInfoCanvas.toDataURL('image/png', 1.0), 'PNG', margin, margin, contentWidth, pInfoHeight);
-        const conHeight = (consolidatedCanvas.height * contentWidth) / consolidatedCanvas.width;
-        doc.addImage(consolidatedCanvas.toDataURL('image/png', 1.0), 'PNG', margin, margin + pInfoHeight + 10, contentWidth, conHeight);
-        
-        // ** UPDATED PDF LAYOUT: 1 Pillar per page **
-        for (let i = 0; i < psychologyData.pillars.length; i++) {
-            doc.addPage();
-            const pillarCard = document.getElementById(`pillarCard${i}`);
-            if (pillarCard) {
-                const canvas = await html2canvas(pillarCard, { scale: quality, windowWidth: 800 });
-                const imgHeight = (canvas.height * contentWidth) / canvas.width;
-                doc.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', margin, margin, contentWidth, imgHeight);
+        const pdfButton = document.getElementById('pdfBtn');
+        pdfButton.disabled = true;
+        pdfButton.innerHTML = '<span>Generating...</span>';
+
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            const quality = 2;
+            const margin = 15;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const contentWidth = pageWidth - margin * 2;
+            const canvasOptions = { scale: quality, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' };
+
+            // Page 1: Player Info + Consolidated Chart
+            const playerInfoEl = document.getElementById('playerInfoCard');
+            const consolidatedEl = document.getElementById('consolidatedCard');
+
+            const playerInfoCanvas = await html2canvas(playerInfoEl, canvasOptions);
+            const consolidatedCanvas = await html2canvas(consolidatedEl, canvasOptions);
+            
+            const pInfoHeight = (playerInfoCanvas.height * contentWidth) / playerInfoCanvas.width;
+            doc.addImage(playerInfoCanvas.toDataURL('image/jpeg', 0.9), 'JPEG', margin, margin, contentWidth, pInfoHeight);
+            
+            const conHeight = (consolidatedCanvas.height * contentWidth) / consolidatedCanvas.width;
+            if (margin + pInfoHeight + 10 + conHeight > doc.internal.pageSize.getHeight()) {
+                doc.addPage();
+                doc.addImage(consolidatedCanvas.toDataURL('image/jpeg', 0.9), 'JPEG', margin, margin, contentWidth, conHeight);
+            } else {
+                doc.addImage(consolidatedCanvas.toDataURL('image/jpeg', 0.9), 'JPEG', margin, margin + pInfoHeight + 10, contentWidth, conHeight);
             }
+
+            // Subsequent Pages
+            for (let i = 0; i < psychologyData.pillars.length; i++) {
+                doc.addPage();
+                const pillarCard = document.getElementById(`pillarCard${i}`);
+                if (pillarCard) {
+                    const canvas = await html2canvas(pillarCard, { ...canvasOptions, windowWidth: 800 });
+                    const imgHeight = (canvas.height * contentWidth) / canvas.width;
+                    doc.addImage(canvas.toDataURL('image/jpeg', 0.9), 'JPEG', margin, margin, contentWidth, imgHeight);
+                }
+            }
+            
+            doc.save(`${getFilename()}.pdf`);
+        } catch (error) {
+            console.error("Failed to create PDF:", error);
+            alert("An error occurred while creating the PDF. Please check the console for details.");
+        } finally {
+            pdfButton.disabled = false;
+            pdfButton.innerHTML = 'Create PDF';
         }
-        
-        doc.save(`${getFilename()}.pdf`);
     }
 
     function resetData() {
-        const currentPlayerData = getPlayerData();
-        loadPlayerData({
-            firstName: currentPlayerData.firstName,
-            lastName: currentPlayerData.lastName,
-            dob: currentPlayerData.dob,
-            nationality: currentPlayerData.nationality,
-            position: currentPlayerData.position,
-            shirtNr: currentPlayerData.shirtNr,
-            imageData: currentPlayerData.imageData,
-            scores: JSON.parse(JSON.stringify(defaultPsychologyData.pillars))
+        document.getElementById('firstName').value = '';
+        document.getElementById('lastName').value = '';
+        document.getElementById('dob').value = '';
+        document.getElementById('nationality').value = '';
+        document.getElementById('position').value = '';
+        document.getElementById('shirtNr').value = '';
+        document.getElementById('marketValue').value = '';
+        document.getElementById('playerImage').src = 'https://placehold.co/150x150/E2E8F0/4A5568?text=Add+Photo';
+        
+        psychologyData.pillars = JSON.parse(JSON.stringify(defaultPsychologyData.pillars));
+
+        psychologyData.pillars.forEach((pillar, pillarIndex) => {
+            pillar.parameters.forEach((param, paramIndex) => {
+                const slider = document.querySelector(`input[data-pillar-index='${pillarIndex}'][data-param-index='${paramIndex}']`);
+                if (slider) {
+                    slider.value = param.score;
+                    slider.nextElementSibling.textContent = param.score;
+                }
+            });
         });
+
+        updateAllCharts();
     }
     
     // --- EVENT LISTENERS ---
@@ -413,9 +483,9 @@
             if (e.target.type === 'range') {
                 const pillarIndex = e.target.dataset.pillarIndex;
                 const paramIndex = e.target.dataset.paramIndex;
-                const newValue = parseFloat(e.target.value);
+                const newValue = parseInt(e.target.value);
                 psychologyData.pillars[pillarIndex].parameters[paramIndex].score = newValue;
-                e.target.nextElementSibling.textContent = newValue.toFixed(1);
+                e.target.nextElementSibling.textContent = newValue;
                 updateAllCharts();
             }
         });
