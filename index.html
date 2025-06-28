@@ -195,7 +195,6 @@
 
 <script>
     // --- SETUP AND DATA ---
-    window.jspdf = window.jspdf.jsPDF; // aliasing for jsPDF v2+
     const SVG_PLACEHOLDER = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iNzUiIGN5PSI3NSIgcj0iNzUiIGZpbGw9IiNFMkU4RjAiLz48bGluZSB4MT0iNzUiIHkxPSI1MCIgeDI9Ijc1IiB5Mj0iMTAwIiBzdHJva2U9IiM0QTU1NjgiIHN0cm9rZS13aWR0aD0iNCIvPjxsaW5lIHgxPSI1MCIgeTE9Ijc1IiB4Mj0iMTAwIiB5Mj0iNzUiIHN0cm9rZT0iIzRBNTU2OCIgc3Ryb2tlLXdpZHRoPSI0Ii8+PC9zdmc+";
 
     // Default state for resetting
@@ -391,13 +390,16 @@
         pdfButton.innerHTML = '<span>Generating...</span>';
 
         try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            if (typeof jspdf === 'undefined') {
+                 throw new Error("jsPDF library not loaded.");
+            }
+            // **FIX 1: More robust way to instantiate jsPDF for v2+**
+            const doc = new jspdf.jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            
             const quality = 2;
             const margin = 15;
             const pageWidth = doc.internal.pageSize.getWidth();
             const contentWidth = pageWidth - margin * 2;
-            // Simplified canvas options for better compatibility
             const canvasOptions = { scale: quality, backgroundColor: '#ffffff' };
 
             // Page 1: Player Info + Consolidated Chart
@@ -440,6 +442,13 @@
     }
 
     function resetData() {
+        // **FIX 2: Destroy existing charts before resetting data**
+        Object.values(psychologyData.charts).forEach(chart => {
+            if (chart && typeof chart.destroy === 'function') {
+                chart.destroy();
+            }
+        });
+
         // Clear all player input fields
         document.getElementById('firstName').value = '';
         document.getElementById('lastName').value = '';
